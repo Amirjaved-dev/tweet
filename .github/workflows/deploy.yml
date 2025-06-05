@@ -1,0 +1,119 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linting and type checking
+        run: npm run check
+
+  build:
+    name: Build
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build application
+        run: npm run build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-artifacts
+          path: |
+            dist/
+            package.json
+            package-lock.json
+
+  deploy:
+    name: Deploy
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: build-artifacts
+
+      - name: Deploy to production server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.PRODUCTION_HOST }}
+          username: ${{ secrets.PRODUCTION_USERNAME }}
+          key: ${{ secrets.PRODUCTION_SSH_KEY }}
+          script: |
+            cd /var/www/ThreadFlowPro
+            
+            # Backup current version
+            timestamp=$(date +%Y%m%d_%H%M%S)
+            if [ -d "dist" ]; then
+              mkdir -p backups
+              cp -r dist "backups/dist_$timestamp"
+            fi
+            
+            # Clean and update application
+            rm -rf dist
+            
+            # Create directory for new files
+            mkdir -p dist
+            
+      - name: Transfer files to server
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.PRODUCTION_HOST }}
+          username: ${{ secrets.PRODUCTION_USERNAME }}
+          key: ${{ secrets.PRODUCTION_SSH_KEY }}
+          source: "dist/,package.json,package-lock.json"
+          target: "/var/www/ThreadFlowPro"
+          strip_components: 0
+
+      - name: Restart application
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.PRODUCTION_HOST }}
+          username: ${{ secrets.PRODUCTION_USERNAME }}
+          key: ${{ secrets.PRODUCTION_SSH_KEY }}
+          script: |
+            cd /var/www/ThreadFlowPro
+            npm ci --production
+            pm2 restart threadflowpro || pm2 start npm --name threadflowpro -- run start
+
+      - name: Send deployment notification
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: |
+            🚀 ThreadFlowPro deployed to production successfully!
+            Commit: ${{ github.event.after }}
+            By: ${{ github.actor }}
+        if: ${{ success() && secrets.TELEGRAM_TOKEN != '' }} 

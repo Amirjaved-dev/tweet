@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment Successful - Thread Nova</title>
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" as="style">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #080B18;
+      color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      position: relative;
+      overflow-x: hidden;
+    }
+    
+    /* Animated Background */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(0, 0, 0, 1) 50%, rgba(99, 102, 241, 0.1) 100%);
+      z-index: -2;
+    }
+    
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(ellipse at center, rgba(139, 92, 246, 0.1) 0%, transparent 70%);
+      z-index: -1;
+    }
+    
+    .container {
+      max-width: 32rem;
+      width: 100%;
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 1.5rem;
+      padding: 2rem;
+      text-align: center;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      position: relative;
+    }
+    
+    .brand {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+    }
+    
+    .brand-icon {
+      width: 2.5rem;
+      height: 2.5rem;
+      background: linear-gradient(135deg, #8B5CF6, #6366F1);
+      border-radius: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    
+    .brand-text {
+      font-size: 1.25rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #A855F7, #6366F1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .success-icon {
+      width: 4rem;
+      height: 4rem;
+      margin: 0 auto 1.5rem;
+      position: relative;
+    }
+    
+    .success-icon::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, #10B981, #059669);
+      border-radius: 50%;
+    }
+    
+    .success-icon::after {
+      content: '';
+      position: absolute;
+      inset: 0.125rem;
+      background: #080B18;
+      border-radius: 50%;
+    }
+    
+    .check-icon {
+      position: relative;
+      z-index: 1;
+      width: 1.5rem;
+      height: 1.5rem;
+      color: #10B981;
+      margin: 1.25rem auto;
+    }
+    
+    .title {
+      font-size: 1.875rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: #ffffff;
+    }
+    
+    .subtitle {
+      color: #D1D5DB;
+      margin-bottom: 2rem;
+      font-size: 1.125rem;
+    }
+    
+    .success-message {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      border-radius: 0.75rem;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .success-message p {
+      color: #6EE7B7;
+      font-size: 0.875rem;
+      margin: 0;
+    }
+    
+    .features-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      text-align: left;
+    }
+    
+    .features-title {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: #ffffff;
+      text-align: center;
+    }
+    
+    .features-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      gap: 0.75rem;
+    }
+    
+    .feature-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      color: #D1D5DB;
+      font-size: 0.875rem;
+    }
+    
+    .feature-check {
+      width: 1rem;
+      height: 1rem;
+      background: linear-gradient(135deg, #8B5CF6, #6366F1);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    
+    .feature-check::after {
+      content: '✓';
+      color: white;
+      font-size: 0.625rem;
+      font-weight: bold;
+    }
+    
+    .support-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 0.75rem;
+      padding: 1rem;
+      margin-bottom: 2rem;
+      text-align: left;
+    }
+    
+    .support-title {
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: #ffffff;
+    }
+    
+    .support-text {
+      font-size: 0.8125rem;
+      color: #9CA3AF;
+      margin: 0;
+      line-height: 1.5;
+    }
+    
+    .cta-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      background: linear-gradient(135deg, #8B5CF6, #6366F1);
+      color: white;
+      font-weight: 600;
+      padding: 0.875rem 2rem;
+      border-radius: 0.75rem;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      border: none;
+      cursor: pointer;
+      font-size: 0.9375rem;
+      box-shadow: 0 4px 6px -1px rgba(139, 92, 246, 0.3);
+      width: 100%;
+    }
+    
+    .cta-button:hover {
+      background: linear-gradient(135deg, #7C3AED, #4F46E5);
+      box-shadow: 0 6px 8px -1px rgba(139, 92, 246, 0.4);
+      transform: translateY(-1px);
+    }
+    
+    .arrow-right {
+      width: 1rem;
+      height: 1rem;
+      stroke: currentColor;
+      stroke-width: 2;
+      fill: none;
+    }
+    
+    @media (max-width: 640px) {
+      .container {
+        padding: 1.5rem;
+        margin: 0.5rem;
+      }
+      
+      .title {
+        font-size: 1.5rem;
+      }
+      
+      .subtitle {
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Brand Header -->
+    <div class="brand">
+      <div class="brand-icon">
+        <div style="color: white; font-weight: bold; font-size: 1rem;">T</div>
+      </div>
+      <span class="brand-text">Thread Nova</span>
+    </div>
+    
+    <!-- Success Icon -->
+    <div class="success-icon">
+      <svg class="check-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+      </svg>
+    </div>
+    
+    <h1 class="title">Payment Successful!</h1>
+    <p class="subtitle">Your subscription has been activated</p>
+    
+    <div class="success-message">
+      <p>🎉 Welcome to premium! Your account has been upgraded with all premium features.</p>
+    </div>
+    
+    <div class="features-card">
+      <h3 class="features-title">Premium Features Unlocked</h3>
+      <ul class="features-list">
+        <li class="feature-item">
+          <span class="feature-check"></span>
+          <span>Unlimited thread generation</span>
+        </li>
+        <li class="feature-item">
+          <span class="feature-check"></span>
+          <span>Advanced AI models & crypto-native tones</span>
+        </li>
+        <li class="feature-item">
+          <span class="feature-check"></span>
+          <span>Real-time market data integration</span>
+        </li>
+        <li class="feature-item">
+          <span class="feature-check"></span>
+          <span>Priority support & early access</span>
+        </li>
+        <li class="feature-item">
+          <span class="feature-check"></span>
+          <span>Advanced analytics & export options</span>
+        </li>
+      </ul>
+    </div>
+    
+    <div class="support-card">
+      <h3 class="support-title">Features not showing?</h3>
+      <p class="support-text">
+        If your account isn't showing premium features, try refreshing or contact our support team at niceearn7@gmail.com. 
+        We're here to help 24/7!
+      </p>
+    </div>
+    
+    <a href="/dashboard" class="cta-button">
+      <span>Continue to Dashboard</span>
+      <svg class="arrow-right" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+      </svg>
+    </a>
+  </div>
+
+  <script>
+    // Enhanced script to redirect to dashboard
+    document.querySelector('.cta-button').addEventListener('click', function(e) {
+      e.preventDefault();
+      
+      // Add a loading state
+      this.innerHTML = '<span>Loading...</span>';
+      this.style.opacity = '0.7';
+      this.style.pointerEvents = 'none';
+      
+      // Small delay for user feedback
+      setTimeout(() => {
+        window.location.href = "/dashboard?upgraded=true";
+      }, 500);
+    });
+
+    // Check if the page is being loaded directly (fallback)
+    if (window.location.pathname === '/payment-success.html') {
+      console.log('Thread Nova payment success fallback page loaded');
+      
+      // Auto-redirect after 10 seconds if user doesn't click
+      setTimeout(() => {
+        console.log('Auto-redirecting to dashboard...');
+        window.location.href = "/dashboard?upgraded=true";
+      }, 10000);
+    }
+    
+    // Add some visual feedback on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      const container = document.querySelector('.container');
+      container.style.transform = 'scale(0.95)';
+      container.style.opacity = '0';
+      
+      setTimeout(() => {
+        container.style.transition = 'all 0.5s ease';
+        container.style.transform = 'scale(1)';
+        container.style.opacity = '1';
+      }, 100);
+    });
+  </script>
+</body>
+</html> 

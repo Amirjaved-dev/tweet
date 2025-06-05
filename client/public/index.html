@@ -1,0 +1,21 @@
+<script type="module" src="/src/main.tsx"></script>
+<script>
+  // Check if we're on the payment success page but the app hasn't loaded properly
+  if (window.location.pathname === '/payment-success' && !window.appLoaded) {
+    // Set a timeout to check if the app loaded
+    setTimeout(function() {
+      // If no content is visible yet, redirect to the static HTML page
+      if (!document.querySelector('#root > *')) {
+        console.log('App failed to load payment success page, redirecting to fallback');
+        window.location.href = '/payment-success.html' + window.location.search;
+      }
+    }, 3000); // Wait 3 seconds for the app to load
+  }
+  
+  // Set a flag when the app has loaded
+  window.addEventListener('load', function() {
+    window.appLoaded = true;
+  });
+</script>
+</body>
+</html> 

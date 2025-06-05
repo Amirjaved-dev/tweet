@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: threadflowpro-app
+    restart: always
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env.production
+    depends_on:
+      - db
+    volumes:
+      - ./logs:/app/logs
+    networks:
+      - threadflowpro-network
+
+  db:
+    image: postgres:14-alpine
+    container_name: threadflowpro-db
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-threadflowpro}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - threadflowpro-network
+
+  # Optional: Add pgAdmin for database management
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: threadflowpro-pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@threadflowpro.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - db
+    networks:
+      - threadflowpro-network
+
+volumes:
+  postgres_data:
+  pgadmin_data:
+
+networks:
+  threadflowpro-network:
+    driver: bridge 
