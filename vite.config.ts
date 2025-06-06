@@ -26,6 +26,16 @@ export default defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
+    sourcemap: true,
+    assetsDir: "assets",
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'wouter', 'tailwind-merge'],
+          ui: ['lucide-react', '@radix-ui', 'class-variance-authority', 'clsx'],
+        }
+      }
+    }
   },
   server: {
     hmr: {
@@ -35,5 +45,9 @@ export default defineConfig({
   },
   define: {
     global: 'globalThis',
-  }
+  },
+  ...(process.env.VERCEL === '1' && {
+    base: '/',
+    publicDir: 'public',
+  })
 });

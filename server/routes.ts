@@ -4,10 +4,14 @@ import { storage } from "./storage";
 import { registerRoutes as registerApiRoutes } from "./routes/index";
 import { canGenerateThread } from "./db/storage";
 import { config } from "./config";
+import healthRouter from "./routes/health";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Register API routes from the routes directory
   const httpServer = await registerApiRoutes(app);
+  
+  // Register health check route
+  app.use('/api/health', healthRouter);
   
   // Basic user endpoints
   app.get("/api/user", async (req, res) => {

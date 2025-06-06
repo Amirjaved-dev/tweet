@@ -212,7 +212,10 @@ app.use('/api', (req, res, next) => {
   next();
 });
 
-(async () => {
+// Register routes and set up the server
+let serverInstance: any = null;
+
+async function setupServer() {
   const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
@@ -232,9 +235,7 @@ app.use('/api', (req, res, next) => {
     });
   });
 
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
+  // Set up static file serving based on environment
   if (app.get("env") === "development") {
     log("Setting up Vite middleware for development", "server");
     await setupVite(app, server);
@@ -242,17 +243,6 @@ app.use('/api', (req, res, next) => {
     log("Setting up static file serving for production", "server");
     serveStatic(app);
   }
-
-  // Add a direct webhook test endpoint
-  app.get('/webhook-test', (req, res) => {
-    log('Webhook test endpoint accessed');
-    res.status(200).json({
-      status: 'ok',
-      message: 'Webhook test endpoint is working',
-      timestamp: new Date().toISOString(),
-      headers: req.headers
-    });
-  });
 
   // Add a catch-all route to handle 404s with helpful message
   app.use((req, res) => {
@@ -269,32 +259,45 @@ app.use('/api', (req, res, next) => {
     });
   });
 
-  // Try to start the server on available ports
-  const primaryPort = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
-  const alternatePorts = [3001, 3002, 5000, 8080];
-  
-  const startServer = (port: number, retryIndex = 0) => {
-    server.listen(port)
-      .on('listening', () => {
-        log(`Server started successfully on port ${port}`);
-      })
-      .on('error', (err: NodeJS.ErrnoException) => {
-        if (err.code === 'EADDRINUSE') {
-          log(`Port ${port} is already in use, trying another port...`);
-          
-          if (retryIndex < alternatePorts.length) {
-            // Try the next alternate port
-            startServer(alternatePorts[retryIndex], retryIndex + 1);
+  return server;
+}
+
+// Only start the server if we're not in a serverless environment
+if (process.env.NODE_ENV !== 'production' || process.env.VERCEL !== '1') {
+  (async () => {
+    const server = await setupServer();
+    // Try to start the server on available ports
+    const primaryPort = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
+    const alternatePorts = [3001, 3002, 5000, 8080];
+    
+    const startServer = (port: number, retryIndex = 0) => {
+      server.listen(port)
+        .on('listening', () => {
+          log(`Server started successfully on port ${port}`);
+          serverInstance = server;
+        })
+        .on('error', (err: NodeJS.ErrnoException) => {
+          if (err.code === 'EADDRINUSE') {
+            log(`Port ${port} is already in use, trying another port...`);
+            
+            if (retryIndex < alternatePorts.length) {
+              // Try the next alternate port
+              startServer(alternatePorts[retryIndex], retryIndex + 1);
+            } else {
+              log('All ports are in use. Please close other applications or specify a different port', 'server-error');
+              process.exit(1);
+            }
           } else {
-            log('All ports are in use. Please close other applications or specify a different port', 'server-error');
+            log(`Error starting server: ${err.message}`, 'server-error');
             process.exit(1);
           }
-        } else {
-          log(`Error starting server: ${err.message}`, 'server-error');
-          process.exit(1);
-        }
-      });
-  };
-  
-  startServer(primaryPort);
-})();
+        });
+    };
+    
+    startServer(primaryPort);
+  })();
+}
+
+// Export for Vercel serverless environment
+setupServer(); // Make sure routes are registered
+export default app;
