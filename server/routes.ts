@@ -5,6 +5,7 @@ import { registerRoutes as registerApiRoutes } from "./routes/index";
 import { canGenerateThread } from "./db/storage";
 import { config } from "./config";
 import healthRouter from "./routes/health";
+import testRouter from "./routes/test";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Register API routes from the routes directory
@@ -12,6 +13,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Register health check route
   app.use('/api/health', healthRouter);
+  
+  // Register test route
+  app.use('/api/test', testRouter);
   
   // Basic user endpoints
   app.get("/api/user", async (req, res) => {
