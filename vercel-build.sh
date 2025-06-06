@@ -4,16 +4,24 @@
 export NODE_ENV=production
 export VERCEL=1
 
-# Install global tools
-npm install -g vite typescript esbuild
+# Install dependencies if needed
+echo "Installing dependencies..."
+npm ci --omit=dev
 
 # Build client
 echo "Building client..."
-vite build
+cd client
+npx vite build --outDir ../dist/public
+cd ..
 
-# Build server
-echo "Building server..."
-tsc -p tsconfig.server.json
-esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist --minify
+# Create a special _vercel.js file for handling SSR in the public directory
+echo "Creating Vercel handlers..."
+cat > dist/public/_vercel.js << EOF
+// This file helps Vercel correctly serve the application
+export default function handler(req, res) {
+  res.setHeader('Content-Type', 'text/html');
+  res.status(200).sendFile('index.html');
+}
+EOF
 
 echo "Build completed successfully!" 

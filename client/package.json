@@ -5,8 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "node build.js",
-    "build:direct": "vite build --outDir ../dist/public",
+    "build": "vite build --outDir ../dist/public",
     "preview": "vite preview"
   }
 } 

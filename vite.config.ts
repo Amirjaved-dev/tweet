@@ -2,6 +2,9 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
 
+// Check if we're building for Vercel
+const isVercel = process.env.VERCEL === '1';
+
 export default defineConfig({
   plugins: [
     react(),
@@ -24,9 +27,11 @@ export default defineConfig({
   },
   root: path.resolve(import.meta.dirname, "client"),
   build: {
-    outDir: path.resolve(import.meta.dirname, "dist/public"),
+    outDir: isVercel 
+      ? path.resolve(import.meta.dirname, "dist/public") 
+      : path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
-    sourcemap: true,
+    sourcemap: process.env.NODE_ENV !== "production",
     assetsDir: "assets",
     rollupOptions: {
       output: {
@@ -91,7 +96,7 @@ export default defineConfig({
       '@radix-ui/react-tooltip'
     ]
   },
-  ...(process.env.VERCEL === '1' && {
+  ...(isVercel && {
     base: '/',
     publicDir: 'public',
   })

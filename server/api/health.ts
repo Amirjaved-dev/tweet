@@ -1,10 +1,10 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { createVercelHandler, jsonResponse } from './vercel-adapter';
 
-export default function handler(request: VercelRequest, response: VercelResponse) {
-  response.status(200).json({
-    status: 'ok',
-    environment: process.env.NODE_ENV || 'development',
+export default createVercelHandler((req, res) => {
+  jsonResponse(res, 200, {
+    status: 'healthy',
     timestamp: new Date().toISOString(),
-    vercel: true
+    environment: process.env.NODE_ENV || 'development'
   });
-} 
+}); 
