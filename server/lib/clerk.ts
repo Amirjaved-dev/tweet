@@ -96,9 +96,11 @@ export async function verifySession(token: string) {
       console.log(`Verifying session token with modern method: ${token.substring(0, 10)}...`);
     }
     
-    // Use the modern networkless verification
+    // Use the modern networkless verification with required parameters
     const payload = await verifyToken(token, {
       secretKey: secretKey,
+      issuer: "https://clerk.threadflowpro.com",
+      audience: "threadflowpro.com"
     });
     
     if (!payload || !payload.sub) {
