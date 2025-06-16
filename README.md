@@ -6,9 +6,9 @@ ThreadFlowPro is a modern web application for creating and managing social media
 
 This application uses a clean architecture with three main services:
 
-- **Clerk** - Authentication & user management
-- **Supabase** - Database & user data storage
+- **Supabase** - Authentication, database & user data storage
 - **Coinbase Commerce** - Cryptocurrency payment processing
+- **MCP Server** - Master Control Program with full Supabase admin access
 
 ## 🔧 Quick Start
 
@@ -17,7 +17,6 @@ This application uses a clean architecture with three main services:
 - Node.js (v18+)
 - npm or yarn
 - Supabase account
-- Clerk account
 - Coinbase Commerce account
 
 ### Setup
@@ -36,11 +35,11 @@ cp env.sample .env
 
 # Edit the .env file with your credentials
 # Minimum required variables:
-# - NEXT_PUBLIC_SUPABASE_URL
-# - NEXT_PUBLIC_SUPABASE_ANON_KEY
+# - VITE_SUPABASE_URL
+# - VITE_SUPABASE_ANON_KEY
 # - SUPABASE_SERVICE_ROLE_KEY
-# - NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
-# - CLERK_SECRET_KEY
+# - SUPABASE_URL (for MCP server)
+# - SUPABASE_SERVICE_KEY (for MCP server)
 ```
 
 3. Database Setup
@@ -81,6 +80,9 @@ npm run db:backup
 npm run payment:test-health
 npm run payment:test-charge
 npm run payment:test-full
+
+# Start MCP server (Supabase admin access)
+npm run mcp
 
 # Docker commands
 npm run docker:build
@@ -140,10 +142,22 @@ ThreadFlowPro/
 ## 📊 Application Workflows
 
 ### Authentication Flow
-1. User signs up/logs in via Clerk
-2. Upon successful authentication, user data is synchronized with Supabase
+1. User signs up/logs in via Supabase Auth
+2. Upon successful authentication, user profile is created/retrieved
 3. The application checks for the user's plan status in Supabase
 4. UI adapts based on whether the user has a free or premium plan
+
+### MCP Server
+The Master Control Program (MCP) server provides full admin access to your Supabase database:
+
+1. Start the MCP server with `npm run mcp` (runs on port 3001)
+2. Use the following API endpoints:
+   - `POST /run-sql`: Run raw SQL queries
+   - `POST /select`: Select data from tables with optional filters
+   - `POST /insert`: Insert data into tables
+   - `POST /update`: Update data in tables
+   - `POST /delete`: Delete data from tables
+3. All endpoints accept JSON payloads and return JSON responses
 
 ### Payment Flow
 1. User clicks "Upgrade to Premium" button
@@ -187,7 +201,6 @@ function PremiumFeature() {
 
 ## 📚 Additional Resources
 
-- [Clerk Documentation](https://clerk.dev/docs)
 - [Supabase Documentation](https://supabase.io/docs)
 - [Coinbase Commerce Documentation](https://commerce.coinbase.com/docs/)
 
